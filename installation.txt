@@ -1,0 +1,20 @@
+conda create -n lara_v2 python=3.11
+conda activate lara_v2
+
+# Install all dependencies
+pip install -r requirements.txt
+
+# Install Playwright browsers
+playwright install chromium
+
+
+# Verify Node is installed
+node --version  # Should show v18.x or higher
+
+# Install frontend dependencies
+npm install
+
+
+
+conda activate lara_v1
+python backend/server.py

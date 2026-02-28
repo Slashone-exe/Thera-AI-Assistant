@@ -1,0 +1,150 @@
+conda.exe : ERROR conda.cli.main_run:execute(127): `conda run python -m pytest 
+tests/test_kasa_agent.py::TestKasaDeviceControl::test_set_brightness -vv --tb=long` failed. (See above for error)
+At C:\Users\nazir\anaconda3\shell\condabin\Conda.psm1:153 char:17
++ ...             & $Env:CONDA_EXE $Env:_CE_M $Env:_CE_CONDA $Command @Othe ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR conda.cli...bove for error):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\nazir\anaconda3\envs\lara_v2_1\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\nazir\Documents\Projects\lara_v2
+configfile: pytest.ini
+plugins: anyio-4.12.0, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_kasa_agent.py::TestKasaDeviceControl::test_set_brightness FAILED [100%]
+
+================================== FAILURES ===================================
+__________________ TestKasaDeviceControl.test_set_brightness __________________
+
+self = <tests.test_kasa_agent.TestKasaDeviceControl object at 0x00000291E5374A10>
+agent_with_devices = <kasa_agent.KasaAgent object at 0x00000291E5377FD0>
+kasa_devices = [{'alias': 'Right Office Light', 'ip': '10.0.0.83', 'model': 'KL135'}, {'alias': 'Left Office Light ', 'ip': '10.0.0.5... Room Light', 'ip': '10.0.0.49', 'model': 'KL135'}, {'alias': 'Left Room Light', 'ip': '10.0.0.116', 'model': 'KL135'}]
+
+    @pytest.mark.asyncio
+    async def test_set_brightness(self, agent_with_devices, kasa_devices):
+        """Test setting brightness."""
+        agent = agent_with_devices
+    
+        if not kasa_devices:
+            pytest.skip("No Kasa devices configured")
+    
+        if not kasa_devices:
+            pytest.skip("No Kasa devices configured")
+    
+        device_config = kasa_devices[0]
+        if not device_config:
+             pytest.skip("Invalid device config")
+    
+        ip = device_config.get('ip')
+        if ip:
+>           result = await agent.set_brightness(ip, 50)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_kasa_agent.py:142: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <kasa_agent.KasaAgent object at 0x00000291E5377FD0>, target = '10.0.0.83'
+brightness = 50
+
+    async def set_brightness(self, target, brightness):
+        """Sets brightness (0-100)."""
+        dev = self._resolve_device(target)
+>       if dev and (dev.is_dimmable or dev.is_bulb):
+                    ^^^^^^^^^^^^^^^
+
+backend\kasa_agent.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <DeviceType.Bulb at 10.0.0.83 - Right Office Light (KL135)>
+name = 'is_dimmable'
+
+    def __getattr__(self, name: str) -> Any:
+        # is_device_type
+        if dep_device_type_attr := self._deprecated_device_type_attributes.get(
+            name
+        ):
+            msg = f"{name} is deprecated, use device_type property instead"
+            warn(msg, DeprecationWarning, stacklevel=2)
+            return self.device_type == dep_device_type_attr[1]
+        # callable
+>       if (result := self._get_deprecated_callable_attribute(name)) is not None:
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+..\..\..\anaconda3\envs\lara_v2_1\Lib\site-packages\kasa\device.py:625: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <DeviceType.Bulb at 10.0.0.83 - Right Office Light (KL135)>
+name = 'is_dimmable'
+
+    def _get_deprecated_callable_attribute(self, name: str) -> Any | None:
+        vals: dict[str, tuple[ModuleName, Callable[[Any], Any], str]] = {
+            "is_dimmable": (
+                Module.Light,
+                lambda c: c.has_feature("brightness"),
+                'light_module.has_feature("brightness")',
+            ),
+            "is_color": (
+                Module.Light,
+                lambda c: c.has_feature("hsv"),
+                'light_module.has_feature("hsv")',
+            ),
+            "is_variable_color_temp": (
+                Module.Light,
+                lambda c: c.has_feature("color_temp"),
+                'light_module.has_feature("color_temp")',
+            ),
+            "valid_temperature_range": (
+                Module.Light,
+                lambda c: c._deprecated_valid_temperature_range(),
+                'minimum and maximum value of get_feature("color_temp")',
+            ),
+            "has_effects": (
+                Module.Light,
+                lambda c: Module.LightEffect in c._device.modules,
+                "Module.LightEffect in device.modules",
+            ),
+        }
+        if mod_call_msg := vals.get(name):
+            mod, call, msg = mod_call_msg
+            msg = f"{name} is deprecated, use: {msg} instead"
+            warn(msg, DeprecationWarning, stacklevel=2)
+>           if (module := self.modules.get(mod)) is None:
+                          ^^^^^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'get'
+
+..\..\..\anaconda3\envs\lara_v2_1\Lib\site-packages\kasa\device.py:572: AttributeError
+---------------------------- Captured stdout setup ----------------------------
+[KasaAgent] Initializing 4 known devices...
+[KasaAgent] Loaded known device: Left Office Light  (10.0.0.52)
+[KasaAgent] Loaded known device: Left Room Light (10.0.0.116)
+[KasaAgent] Loaded known device: Right Room Light (10.0.0.49)
+[KasaAgent] Loaded known device: Right Office Light (10.0.0.83)
+============================== warnings summary ===============================
+backend\kasa_agent.py:2
+backend\kasa_agent.py:2
+  C:\Users\nazir\Documents\Projects\lara_v2\backend\kasa_agent.py:2: DeprecationWarning: SmartDevice is deprecated, use IotDevice from package kasa.iot instead or use Discover.discover_single() and Device.connect() to support new protocols
+    from kasa import Discover, SmartDevice, SmartBulb, SmartPlug
+
+backend\kasa_agent.py:2
+backend\kasa_agent.py:2
+  C:\Users\nazir\Documents\Projects\lara_v2\backend\kasa_agent.py:2: DeprecationWarning: SmartBulb is deprecated, use IotBulb from package kasa.iot instead or use Discover.discover_single() and Device.connect() to support new protocols
+    from kasa import Discover, SmartDevice, SmartBulb, SmartPlug
+
+backend\kasa_agent.py:2
+backend\kasa_agent.py:2
+  C:\Users\nazir\Documents\Projects\lara_v2\backend\kasa_agent.py:2: DeprecationWarning: SmartPlug is deprecated, use IotPlug from package kasa.iot instead or use Discover.discover_single() and Device.connect() to support new protocols
+    from kasa import Discover, SmartDevice, SmartBulb, SmartPlug
+
+tests/test_kasa_agent.py::TestKasaDeviceControl::test_set_brightness
+  C:\Users\nazir\anaconda3\envs\lara_v2_1\Lib\site-packages\kasa\device.py:625: DeprecationWarning: is_dimmable is deprecated, use: light_module.has_feature("brightness") instead
+    if (result := self._get_deprecated_callable_attribute(name)) is not None:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_kasa_agent.py::TestKasaDeviceControl::test_set_brightness - AttributeError: 'NoneType' object has no attribute 'get'
+======================== 1 failed, 7 warnings in 1.15s ========================
+
